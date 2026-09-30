@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import { SiteFooter, SiteHeader } from '@/components/site-chrome';
 
@@ -17,7 +16,7 @@ export default function AboutPage() {
         <section><span className="cv-label">EXPERIENCE</span><div className="cv-entry"><div><h2>Quantitative Analyst Intern</h2><span>CRYPTO BROKER · SIX MONTHS</span></div><p>Worked on a C++ crypto RFQ pricing and execution module, and researched market-making strategies with Python backtests across market regimes and liquidity conditions.</p></div><div className="cv-entry"><div><h2>Data Science Intern</h2><span>AEROSPACE · INTERNSHIP</span></div><p>Simulated aeronautics-related physics models using machine learning tools.</p></div></section>
         <section><span className="cv-label">EDUCATION</span><div className="cv-entry"><div><h2>High Performance Computing &amp; Simulation</h2><span>COMPUTER SCIENCE STUDIES</span></div><p>Parallel and distributed programming, multicore architectures, operating systems, compilation and performance evaluation.</p></div><div className="cv-entry"><div><h2>Applied Mathematics, Computer Science &amp; Economics</h2><span>UNDERGRADUATE STUDY</span></div><p>Quantitative and computational foundations across mathematics, computing and economics.</p></div></section>
         <section><span className="cv-label">TOOLS &amp; INTERESTS</span><p className="cv-skills">Rust · C++ · Python · Linux · distributed systems · market data · DeFi · concurrency · quantitative research</p></section>
-        <section><span className="cv-label">ELSEWHERE</span><p><a className="inline-arrow" href="https://github.com/NicoBeCodin" target="_blank" rel="noreferrer">github.com/NicoBeCodin <ArrowUpRight size={16}/></a></p><p><a className="inline-arrow" href="mailto:nicobecodin@duck.com">nicobecodin@duck.com <ArrowUpRight size={16}/></a></p><p><Link className="inline-arrow" href="/writing">Read the build log <ArrowUpRight size={16}/></Link></p></section>
+        <section><span className="cv-label">ELSEWHERE</span><p><a className="inline-arrow" href="https://github.com/NicoBeCodin" target="_blank" rel="noreferrer">github.com/NicoBeCodin <ArrowUpRight size={16}/></a></p><p><a className="inline-arrow" href="mailto:nicobecodin@duck.com">nicobecodin@duck.com <ArrowUpRight size={16}/></a></p><p><a className="inline-arrow" href="/writing/">Read the build log <ArrowUpRight size={16}/></a></p></section>
       </div></div><SiteFooter/>
   </div></main>;
 }

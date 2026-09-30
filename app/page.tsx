@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import { SiteFooter, SiteHeader } from '@/components/site-chrome';
 import { getPosts } from '@/lib/posts';
@@ -18,7 +17,7 @@ const projects = [
     title: 'Multi-venue market making',
     label: 'Rust · trading infrastructure',
     description: 'A private research and execution project that has me thinking about market data, orders, fills and what really happens between a backtest and a live system.',
-    href: '/projects#market-making',
+    href: '/projects/#market-making',
     action: 'Read about the project',
   },
   {
@@ -26,7 +25,7 @@ const projects = [
     title: 'LeafPay',
     label: 'Solana · zero knowledge',
     description: 'A privacy-pool prototype that made the final round of a Colosseum hackathon. It taught me a lot about the gap between a prototype and production.',
-    href: '/projects#leafpay',
+    href: '/projects/#leafpay',
     action: 'Read about the project',
   },
 ];
@@ -47,7 +46,7 @@ const tools = [
   {
     title: 'tmux cheat sheet',
     description: 'A desktop wallpaper I made to keep the tmux commands I use close at hand.',
-    href: '/tools/tmux-cheatsheet',
+    href: '/tools/tmux-cheatsheet/',
     action: 'Preview and download',
   },
 ];
@@ -61,17 +60,17 @@ export default function Home() {
     <section className="home-intro" id="about" aria-labelledby="intro-title">
       <h1 className="sr-only" id="intro-title">About me</h1>
       <p>I&apos;m interested in decentralized finance, trading systems, low-level performance and multicore architecture. Rust is usually where I end up. I recently finished a quant analyst internship at a crypto broker, and I&apos;m using this time to build things, break them, and write down what I learn.</p>
-      <Link className="inline-arrow" href="/about">A bit more about me <ArrowUpRight size={17}/></Link>
+      <a className="inline-arrow" href="/about/">A bit more about me <ArrowUpRight size={17}/></a>
     </section>
 
     <section className="home-section" id="writing" aria-labelledby="writing-heading">
-      <div className="home-section-heading"><div><span className="section-kicker">WRITING</span><h2 id="writing-heading">Recent articles</h2></div><Link className="section-link" href="/writing">All articles <ArrowUpRight size={17}/></Link></div>
-      <div className="home-articles">{recentPosts.map((post) => <Link className="home-article" href={`/writing/${post.slug}`} key={post.slug}><span className="home-item-meta">{post.series} · Part {post.part} · {post.readTime}</span><h3>{post.title}</h3><p>{post.description}</p><span className="home-item-action">Read article <ArrowUpRight size={16}/></span></Link>)}</div>
+      <div className="home-section-heading"><div><span className="section-kicker">WRITING</span><h2 id="writing-heading">Recent articles</h2></div><a className="section-link" href="/writing/">All articles <ArrowUpRight size={17}/></a></div>
+      <div className="home-articles">{recentPosts.map((post) => <a className="home-article" href={`/writing/${post.slug}/`} key={post.slug}><span className="home-item-meta">{post.series} · Part {post.part} · {post.readTime}</span><h3>{post.title}</h3><p>{post.description}</p><span className="home-item-action">Read article <ArrowUpRight size={16}/></span></a>)}</div>
     </section>
 
     <section className="home-section" id="projects" aria-labelledby="projects-heading">
-      <div className="home-section-heading"><div><span className="section-kicker">PROJECTS</span><h2 className="sr-only" id="projects-heading">Projects</h2></div><Link className="section-link" href="/projects">More projects <ArrowUpRight size={17}/></Link></div>
-      <div className="home-projects">{projects.map((project) => 'sourceLink' in project ? <div className="home-project" key={project.number}><span className="home-project-number">{project.number}</span><div><span className="home-item-meta">{project.label}</span><h3>{project.title}</h3><p>{project.description}</p><div className="home-project-links"><Link className="home-item-action" href={project.href}>{project.action} <ArrowUpRight size={16}/></Link><a className="home-item-action" href={project.sourceLink} target="_blank" rel="noreferrer">View source <ArrowUpRight size={16}/></a></div></div></div> : <Link className="home-project" href={project.href} key={project.number}><span className="home-project-number">{project.number}</span><div><span className="home-item-meta">{project.label}</span><h3>{project.title}</h3><p>{project.description}</p><span className="home-item-action">{project.action} <ArrowUpRight size={16}/></span></div></Link>)}</div>
+      <div className="home-section-heading"><div><span className="section-kicker">PROJECTS</span><h2 className="sr-only" id="projects-heading">Projects</h2></div><a className="section-link" href="/projects/">More projects <ArrowUpRight size={17}/></a></div>
+      <div className="home-projects">{projects.map((project) => 'sourceLink' in project ? <div className="home-project" key={project.number}><span className="home-project-number">{project.number}</span><div><span className="home-item-meta">{project.label}</span><h3>{project.title}</h3><p>{project.description}</p><div className="home-project-links"><a className="home-item-action" href={`${project.href}/`}>{project.action} <ArrowUpRight size={16}/></a><a className="home-item-action" href={project.sourceLink} target="_blank" rel="noreferrer">View source <ArrowUpRight size={16}/></a></div></div></div> : <a className="home-project" href={project.href} key={project.number}><span className="home-project-number">{project.number}</span><div><span className="home-item-meta">{project.label}</span><h3>{project.title}</h3><p>{project.description}</p><span className="home-item-action">{project.action} <ArrowUpRight size={16}/></span></div></a>)}</div>
       <p className="highload-note">I also like a good performance puzzle. You can find my challenge work on <a href="https://highload.fun/users/nicobecodin/overview" target="_blank" rel="noreferrer">HighLoad.fun / @nicobecodin <ArrowUpRight size={15}/></a>.</p>
     </section>
 

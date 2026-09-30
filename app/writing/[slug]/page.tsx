@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { SiteFooter, SiteHeader } from '@/components/site-chrome';
@@ -17,5 +16,5 @@ export async function generateMetadata({params}: {params: Promise<{slug: string}
 export default async function ArticlePage({params}: {params: Promise<{slug: string}>}) {
   const post = getPost((await params).slug);
   if (!post) notFound();
-  return <main><div className="page-shell"><SiteHeader/><article className="article-shell"><div className="article-top"><Link className="back-link" href="/writing"><ArrowLeft size={16}/> All writing</Link><span>{post.series.toUpperCase()} / PART {String(post.part).padStart(2,'0')}</span></div><header className="article-header"><span className="section-kicker">BUILD LOG / LIGHT DEX</span><h1>{post.title}</h1><p>{post.description}</p><div className="article-byline"><span>LIGHT DEX JOURNAL</span><span>{new Date(`${post.date}T12:00:00Z`).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span><span>{post.readTime.toUpperCase()}</span></div></header><div className="article-body" dangerouslySetInnerHTML={{__html: post.html}}/><div className="article-end"><span>END OF PART {String(post.part).padStart(2,'0')}</span><Link href="/writing">More writing <ArrowUpRight size={17}/></Link></div></article><SiteFooter/></div></main>;
+  return <main><div className="page-shell"><SiteHeader/><article className="article-shell"><div className="article-top"><a className="back-link" href="/writing/"><ArrowLeft size={16}/> All writing</a><span>{post.series.toUpperCase()} / PART {String(post.part).padStart(2,'0')}</span></div><header className="article-header"><span className="section-kicker">BUILD LOG / LIGHT DEX</span><h1>{post.title}</h1><p>{post.description}</p><div className="article-byline"><span>LIGHT DEX JOURNAL</span><span>{new Date(`${post.date}T12:00:00Z`).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span><span>{post.readTime.toUpperCase()}</span></div></header><div className="article-body" dangerouslySetInnerHTML={{__html: post.html}}/><div className="article-end"><span>END OF PART {String(post.part).padStart(2,'0')}</span><a href="/writing/">More writing <ArrowUpRight size={17}/></a></div></article><SiteFooter/></div></main>;
 }
