@@ -1,0 +1,28 @@
+@startuml
+!theme plain
+skinparam backgroundColor #0B151B
+skinparam defaultFontName Monospaced
+skinparam defaultFontColor #D9E7E5
+skinparam sequenceArrowColor #60E1C2
+skinparam sequenceLifeLineBorderColor #52737A
+skinparam sequenceLifeLineBackgroundColor #102129
+skinparam sequenceParticipantBorderColor #52737A
+skinparam sequenceParticipantBackgroundColor #102129
+skinparam sequenceParticipantFontColor #D9E7E5
+skinparam sequenceGroupBorderColor #52737A
+skinparam sequenceGroupFontColor #D9E7E5
+hide footbox
+
+participant "Primary" as P
+participant "One replica" as R
+participant "Peer set" as G
+database "Block log" as L
+
+P -> R: PRE-PREPARE(block, digest)
+R -> R: check primary, view, sequence, digest
+R -> G: PREPARE (broadcast)
+G --> R: 2f matching PREPARE votes
+R -> G: COMMIT (broadcast)
+G --> R: 2f+1 matching COMMIT votes
+R -> L: append block
+@enduml

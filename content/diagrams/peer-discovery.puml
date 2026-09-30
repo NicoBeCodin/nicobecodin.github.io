@@ -1,0 +1,36 @@
+@startuml
+!theme plain
+skinparam backgroundColor #0B151B
+skinparam defaultFontName Monospaced
+skinparam defaultFontColor #D9E7E5
+skinparam sequenceArrowColor #60E1C2
+skinparam sequenceLifeLineBorderColor #52737A
+skinparam sequenceLifeLineBackgroundColor #102129
+skinparam sequenceParticipantBorderColor #52737A
+skinparam sequenceParticipantBackgroundColor #102129
+skinparam sequenceParticipantFontColor #D9E7E5
+skinparam sequenceGroupBorderColor #52737A
+skinparam sequenceGroupFontColor #D9E7E5
+hide footbox
+
+participant "Controller" as C
+participant "Node 0" as N0
+participant "Node 1" as N1
+participant "Node 2" as N2
+
+N0 -> C: REGISTER(id, address)
+N1 -> C: REGISTER(id, address)
+N2 -> C: REGISTER(id, address)
+C -> N0: peer table
+C -> N1: peer table
+C -> N2: peer table
+N0 -> N1: open TCP connection
+N0 -> N2: open TCP connection
+N1 -> N2: open TCP connection
+N0 -> C: READY
+N1 -> C: READY
+N2 -> C: READY
+C -> N0: START
+C -> N1: START
+C -> N2: START
+@enduml
