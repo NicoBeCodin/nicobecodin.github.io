@@ -1,11 +1,13 @@
 ---
-title: "Building a DEX from scratch — Part 2: Adding an exchange and agreeing on execution"
-description: "How does a decentralized exchange work? Part 2 adds accounts, balances, an order book, and deterministic execution."
+title: "Adding an exchange and agreeing on execution"
+description: "Adding accounts, balances, an order book, and deterministic execution to Light DEX."
 date: "2026-09-29"
 series: "Building Light DEX"
 part: 2
 readTime: "14 min read"
 ---
+
+The project is on [GitHub](https://github.com/NicoBeCodin/light_dex) if you want to follow along with the code or run it yourself.
 
 In [the previous post](/writing/building-a-dex-part-1), the nodes learned to discover each other, communicate over TCP, agree on blocks with PBFT-style voting, and rotate the primary when it stopped. But the transactions inside those blocks still looked roughly like this:
 
@@ -14,8 +16,6 @@ In [the previous post](/writing/building-a-dex-part-1), the nodes learned to dis
 ```
 
 Agreeing on arbitrary strings is a start, but it does not make an exchange. Consensus establishes transaction order; an execution layer gives those transactions meaning. Once the network agrees on a block, that block must **change some state**: balances move, orders enter the book, trades happen, and cancels remove resting orders.
-
-You can [follow the Light DEX code on GitHub](https://github.com/NicoBeCodin/light_dex) as the project develops.
 
 ## From a blockchain to a state machine
 
@@ -288,7 +288,7 @@ nonce 123
 
 The network had reordered transactions during failover. TCP preserves message order on **one connection**, but several replicas were replaying to the new primary at the same time. An account expecting `116, 117, 118, 119, 120...` was now seeing `116, 117, 118, 127, 120...`. The execution layer correctly rejected transactions with the wrong nonce.
 
-The simplified leader rotation worked. The nonce checks worked. The assumption connecting them—that replay would preserve each account's order—did not. A system can be wrong even when its components each do what they were designed to do.
+The simplified leader rotation and nonce checks both worked, but I had assumed replay would preserve each account's transaction order. With several replicas forwarding at once, that assumption broke.
 
 ## Mempool order isn't execution order
 

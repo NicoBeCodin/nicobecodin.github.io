@@ -9,5 +9,5 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
-  return <footer className="site-footer site-footer-simple"><small>© 2026 · Notes on code and markets</small><div className="footer-links"><a href="/">Home</a><a href="/writing/">Articles</a><a href="/projects/">Projects</a></div></footer>;
+  return <footer className="site-footer site-footer-simple"><small>© 2026 · nicobecodin</small><div className="footer-links"><a href="/">Home</a><a href="/writing/">Articles</a><a href="/projects/">Projects</a></div></footer>;
 }

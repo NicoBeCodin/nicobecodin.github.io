@@ -1,6 +1,6 @@
 import { ArrowUpRight } from 'lucide-react';
 import { SiteFooter, SiteHeader } from '@/components/site-chrome';
-import { getPosts } from '@/lib/posts';
+import { getPostShortLabel, getPosts } from '@/lib/posts';
 
 const projects = [
   {
@@ -65,7 +65,7 @@ export default function Home() {
 
     <section className="home-section" id="writing" aria-labelledby="writing-heading">
       <div className="home-section-heading"><div><span className="section-kicker">WRITING</span><h2 id="writing-heading">Recent articles</h2></div><a className="section-link" href="/writing/">All articles <ArrowUpRight size={17}/></a></div>
-      <div className="home-articles">{recentPosts.map((post) => <a className="home-article" href={`/writing/${post.slug}/`} key={post.slug}><span className="home-item-meta">{post.series} · Part {post.part} · {post.readTime}</span><h3>{post.title}</h3><p>{post.description}</p><span className="home-item-action">Read article <ArrowUpRight size={16}/></span></a>)}</div>
+      <div className="home-articles">{recentPosts.map((post) => <a className="home-article" href={`/writing/${post.slug}/`} key={post.slug}><span className="home-item-meta">{getPostShortLabel(post)} · {post.readTime}</span><h3>{post.title}</h3><p>{post.description}</p><span className="home-item-action">Read article <ArrowUpRight size={16}/></span></a>)}</div>
     </section>
 
     <section className="home-section" id="projects" aria-labelledby="projects-heading">

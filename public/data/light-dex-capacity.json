@@ -1,0 +1,55 @@
+{
+  "title": "Light DEX: four local validators, six trading markets",
+  "measured_on": "2026-10-19",
+  "source_repository": "NicoBeCodin/light_dex",
+  "source_report": "docs/validator-performance-followup-2026-10-19.md",
+  "configuration": {
+    "cpu": "Intel i5-8365U, four physical cores",
+    "validators": 4,
+    "affinity": "One validator process and its threads per distinct physical core",
+    "algorithm": "HotStuff",
+    "markets": ["BTC-USD spot", "BTC-USD perp", "ETH-USD spot", "ETH-USD perp", "SOL-USD spot", "SOL-USD perp"],
+    "block_time_ms": 100,
+    "timeout_ms": 1500,
+    "rotate_leader_every_blocks": 4,
+    "journal_sync": "sync_all",
+    "driver_accounts": 192,
+    "in_flight_per_account": 32,
+    "submission_workers": 64,
+    "warmup_seconds": 12,
+    "latency_target_ms": 500
+  },
+  "methodology": {
+    "throughput": "Successful transactions per measured second, from node status.",
+    "latency": "p95 from the driver's intended submission time to durable commit; joined by transaction digest.",
+    "correctness": "After shutdown, every signed validator journal was replayed; certified history and equal-height state roots agreed.",
+    "limits": "Two individual local runs, not an isolated before/after optimization experiment. Validators, generator and other services share one laptop. No confidence intervals or multi-host capacity claim.",
+    "security": "Aggregate results only. Raw session artifacts include simulation signing keys and are not distributed."
+  },
+  "runs": [
+    {
+      "source_summary": "benchmark_results/profile-2026-10-19/four-pinned-2600-120s-64w/pilot-1792411484537/summary.json",
+      "requested_tps": 2600,
+      "successful_tps": 2592.5205785425455,
+      "configured_measure_seconds": 120,
+      "measured_seconds": 120.007533431,
+      "scheduled_to_commit_p95_ms": 310,
+      "scheduled_slots": 312000,
+      "blocked_slots": 0,
+      "unaccounted_slots": 0,
+      "latency_slo_met": true
+    },
+    {
+      "source_summary": "benchmark_results/profile-2026-10-19/four-pinned-2800-90s-64w/pilot-1792411877345/summary.json",
+      "requested_tps": 2800,
+      "successful_tps": 2771.2524334802333,
+      "configured_measure_seconds": 90,
+      "measured_seconds": 90.009483433,
+      "scheduled_to_commit_p95_ms": 796,
+      "scheduled_slots": 252000,
+      "blocked_slots": 0,
+      "unaccounted_slots": 0,
+      "latency_slo_met": false
+    }
+  ]
+}

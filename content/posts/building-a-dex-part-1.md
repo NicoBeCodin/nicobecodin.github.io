@@ -1,17 +1,19 @@
 ---
-title: "Building a DEX from scratch — Part 1: Making nodes agree"
-description: "How does a decentralized exchange work? Part 1 starts with node discovery and consensus."
+title: "Making nodes agree"
+description: "Starting a decentralized exchange with node discovery and consensus."
 date: "2026-09-28"
 series: "Building Light DEX"
 part: 1
 readTime: "8 min read"
 ---
 
+The project is on [GitHub](https://github.com/NicoBeCodin/light_dex) if you want to follow along with the code or run it yourself.
+
 Hyperliquid is one of crypto's most talked-about exchanges. Its [documentation](https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/overview) explains the broad architecture, but its public [node repository](https://github.com/hyperliquid-dex/node) distributes binaries rather than the core implementation. How does a decentralized exchange like that work underneath?
 
 One way to find out is to build a smaller version. Light DEX is an experiment in the pieces an exchange needs: nodes that find each other, consensus on transaction order, an execution layer that updates balances, and eventually an order book. It is not a Hyperliquid clone or a production-ready chain. The point is to understand the design choices and the problems that appear when those pieces meet.
 
-This series explains each piece through the implementation, including the parts that did not work on the first try. The code is still evolving; you can [follow Light DEX on GitHub](https://github.com/NicoBeCodin/light_dex).
+This series explains each piece through the implementation, including the parts that did not work on the first try. The code is still evolving.
 
 ## Where do you even start?
 
@@ -87,4 +89,4 @@ The transactions inside those blocks are still just strings such as `"Dummy tx 4
 
 In the next part, those strings become state changes: accounts, balances, nonces, transfers, and the beginnings of an order book. Once transactions have nonces, primary failure also becomes more interesting. Replayed transactions can arrive in a different order, so “just retry them” is not enough.
 
-[Continue to Part 2: Adding an exchange and agreeing on execution](/writing/building-a-dex-part-2)
+[Next: Adding an exchange and agreeing on execution](/writing/building-a-dex-part-2)
