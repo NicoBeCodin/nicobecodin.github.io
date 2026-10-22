@@ -1,0 +1,33 @@
+@startdot
+digraph LeafPayPeaks {
+  graph [bgcolor="#0B151B", rankdir=BT, pad="0.4", nodesep="0.22", ranksep="0.65", splines=polyline, ordering=out, label="SIX COMPLETED BATCHES  =  4 + 2", labelloc=b, fontname="DejaVu Sans Mono", fontsize=14, fontcolor="#91AAB0"];
+  node [shape=box, style="rounded,filled", fillcolor="#102129", color="#52737A", fontcolor="#D9E7E5", fontname="DejaVu Sans Mono", fontsize=13, margin="0.18,0.13", penwidth=1.5];
+  edge [dir=none, color="#52737A", penwidth=2];
+
+  B0 [label="B0\n16 leaves"];
+  B1 [label="B1\n16 leaves"];
+  B2 [label="B2\n16 leaves"];
+  B3 [label="B3\n16 leaves"];
+  B4 [label="B4\n16 leaves"];
+  B5 [label="B5\nnew full batch", fillcolor="#382919", color="#F6B26B"];
+
+  P01 [label="32-leaf root"];
+  P23 [label="32-leaf root"];
+  PeakA [label="STORED PEAK\n64 leaves / B0-B3", fillcolor="#123C38", color="#60E1C2"];
+  PeakB [label="STORED PEAK\n32 leaves / B4-B5", fillcolor="#382919", color="#F6B26B"];
+  Root [label="derived verification root\n(pad smaller peak, then fold)", fillcolor="#1B2934", color="#91AAB0"];
+
+  {rank=same; B0; B1; B2; B3; B4; B5;}
+  {rank=same; PeakA; PeakB;}
+  B0 -> P01;
+  B1 -> P01;
+  B2 -> P23;
+  B3 -> P23;
+  P01 -> PeakA [color="#60E1C2", penwidth=2.5];
+  P23 -> PeakA [color="#60E1C2", penwidth=2.5];
+  B4 -> PeakB [color="#F6B26B", penwidth=2.5];
+  B5 -> PeakB [color="#F6B26B", penwidth=3];
+  PeakA -> Root [style=dashed, color="#91AAB0", penwidth=2];
+  PeakB -> Root [style=dashed, color="#91AAB0", penwidth=2];
+}
+@enddot

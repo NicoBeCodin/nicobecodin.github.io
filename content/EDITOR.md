@@ -1,9 +1,9 @@
-# Edit the optimization article in your browser
+# Edit articles in your browser
 
 1. Open https://app.pagescms.org and sign in with GitHub.
 2. Install/authorize the Pages CMS GitHub app for **only** `nicobecodin.github.io`.
 3. Select `NicoBeCodin/nicobecodin.github.io`, then the `main` branch.
-4. Open **Optimization tricks for a DEX validator** in the sidebar.
+4. Open **Making sense of HotStuff**, **Optimization tricks for a DEX validator**, or **How a Solana ZK mixer works: building LeafPay** in the sidebar.
 5. Edit the formatted Article field and save.
 
 The editor is separate from the public website. Repository write permissions and
@@ -14,8 +14,7 @@ not security boundaries for someone who already has repository write access.
 ## Saving and publishing
 
 Saving on `main` commits to GitHub and starts the existing Pages build. When that
-deployment succeeds, the changes appear at:
-https://nicobecodin.github.io/writing/building-a-dex-part-4/
+deployment succeeds, the changes appear on the [Writing page](https://nicobecodin.github.io/writing/).
 
 For unpublished edits, create/select an editorial branch in GitHub/Pages CMS
 instead. Only pushes to `main` trigger this site's automatic publication.
@@ -27,8 +26,9 @@ the article changes while preserving the rest of the worktree.
 
 ## Figures
 
-Leave the three standalone **Figure:** links in the article body. They become
-the shared-state animation, Merkle animation and benchmark chart on the site.
+Leave each standalone **Figure:** link in the article body. They become the
+animations or diagrams on the site. Article 3 has two, article 4 has three,
+and LeafPay has three.
 They are standard Markdown links so the rich-text editor need not preserve
 custom HTML comments or figure markup. The CMS displays placeholders rather
 than live animations; see the published article for those.
@@ -38,8 +38,7 @@ will fail the new build rather than publish an article missing its illustration.
 Restore the link in the editor and save again. A failed build does not undo the
 GitHub commit; the previously deployed website stays live.
 
-Only this article is enabled initially. Other articles include custom HTML and
-must be made editor-safe before enabling rich-text editing for them.
+The two earlier Light DEX articles are not in the CMS yet.
 
 Run `node --experimental-strip-types --test scripts/article-figures.test.mjs`
 and `npm run build` after changing the renderer or editor configuration.

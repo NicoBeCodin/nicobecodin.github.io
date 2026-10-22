@@ -17,7 +17,7 @@ export default function WritingPage() {
       <h1>Writing</h1>
       <p>Build logs, technical explainers and whatever is on my mind. Writing helps me check that I understand something so here you go.</p>
     </section>
-    {groups.filter(group => group.posts.length > 0).map(group => <section className="writing-group" key={group.id} aria-labelledby={group.id}>
+    {groups.map(group => <section className="writing-group" key={group.id} aria-labelledby={group.id}>
       <h2 id={group.id}>{group.title}</h2>
       <div className="archive-list">{group.posts.map(post => <a className="archive-row" href={`/writing/${post.slug}/`} key={post.slug}>
         <div className="archive-date">{new Date(`${post.date}T12:00:00Z`).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}</div>

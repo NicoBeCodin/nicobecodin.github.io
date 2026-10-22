@@ -21,10 +21,7 @@ In my [PBFT implementation](/writing/building-a-dex-part-1), replicas broadcast 
 
 HotStuff collects phase votes at the leader. The leader sends back evidence of a quorum, so replicas can check the result without receiving every vote directly from its sender.
 
-<figure class="article-diagram">
-  <img src="/diagrams/hotstuff-topology.svg" width="800" height="310" loading="lazy" alt="Four PBFT replicas exchange votes with every other replica. In HotStuff, three replicas send phase votes to a leader, which distributes a certificate." />
-  <figcaption>Who receives the votes during one phase. In HotStuff, the leader collects them and sends a certificate back.</figcaption>
-</figure>
+[Figure: PBFT and HotStuff vote paths](#figure-hotstuff-topology)
 
 My certificates contain individual Ed25519 signatures, so they grow with the number of voters. View-change messages are also still broadcasts. That means this implementation doesn't have the paper's linear communication cost.
 
@@ -40,7 +37,7 @@ A quorum certificate, or QC, records the view, height, phase and block digest, t
 
 You can follow block B through the steps below, then switch to the leader-failure scenario.
 
-<!-- interactive:hotstuff -->
+[Figure: Follow a HotStuff block](#figure-hotstuff)
 
 In Prepare, the leader proposes B with a certificate justifying the proposal. Replicas check the leader, view, height, digest and certificate, along with their voting rules. The node's validation path also checks the block's execution. Accepting replicas send prepare votes to the leader.
 

@@ -1,0 +1,50 @@
+@startdot
+digraph MemoToWitness {
+  graph [bgcolor="#0B151B", rankdir=BT, pad="0.4", nodesep="0.20", ranksep="0.64", splines=polyline, ordering=out, label="ONE MEMO SUPPLIES EIGHT LEAVES", labelloc=b, fontname="DejaVu Sans Mono", fontsize=14, fontcolor="#91AAB0"];
+  node [shape=box, style="rounded,filled", fillcolor="#102129", color="#52737A", fontcolor="#D9E7E5", fontname="DejaVu Sans Mono", fontsize=13, margin="0.16,0.12", penwidth=1.5];
+  edge [dir=none, color="#52737A", penwidth=1.8];
+
+  subgraph cluster_memo {
+    label="ONE FETCHED MEMO  /  EIGHT COMMITMENTS";
+    labelloc=b;
+    fontname="DejaVu Sans Mono";
+    fontsize=13;
+    fontcolor="#91AAB0";
+    color="#36515A";
+    style="rounded,dashed";
+    margin=18;
+    L0 [label="L0"];
+    L1 [label="L1"];
+    L2 [label="L2"];
+    L3 [label="L3"];
+    L4 [label="L4\nsibling", fillcolor="#382919", color="#F6B26B"];
+    L5 [label="L5\nyour note", fillcolor="#123C38", color="#60E1C2"];
+    L6 [label="L6"];
+    L7 [label="L7"];
+  }
+
+  H01 [label="H01"];
+  H23 [label="H23"];
+  H45 [label="H45", fillcolor="#123C38", color="#60E1C2"];
+  H67 [label="H67\nsibling", fillcolor="#382919", color="#F6B26B"];
+  H03 [label="H03\nsibling", fillcolor="#382919", color="#F6B26B"];
+  H47 [label="H47", fillcolor="#123C38", color="#60E1C2"];
+  Root8 [label="root of these eight leaves", fillcolor="#123C38", color="#60E1C2"];
+
+  {rank=same; L0; L1; L2; L3; L4; L5; L6; L7;}
+  L0 -> H01;
+  L1 -> H01;
+  L2 -> H23;
+  L3 -> H23;
+  L4 -> H45 [color="#F6B26B", penwidth=2.5];
+  L5 -> H45 [color="#60E1C2", penwidth=3];
+  L6 -> H67;
+  L7 -> H67;
+  H01 -> H03;
+  H23 -> H03;
+  H45 -> H47 [color="#60E1C2", penwidth=3];
+  H67 -> H47 [color="#F6B26B", penwidth=2.5];
+  H03 -> Root8 [color="#F6B26B", penwidth=2.5];
+  H47 -> Root8 [color="#60E1C2", penwidth=3];
+}
+@enddot

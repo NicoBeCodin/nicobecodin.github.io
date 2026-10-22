@@ -10,12 +10,23 @@ test('CMS config targets only article 4 and preserves frontmatter fields', () =>
   const require = createRequire(import.meta.url);
   const yaml = createRequire(require.resolve('gray-matter'))('js-yaml');
   const config = yaml.safeLoad(readFileSync(new URL('../.pages.yml', import.meta.url), 'utf8'));
-  assert.equal(config.content.length, 1);
-  const entry = config.content[0];
+  assert.equal(config.content.length, 3);
+  const entry = config.content.find(item => item.path === 'content/posts/building-a-dex-part-4.md');
   assert.equal(entry.path, 'content/posts/building-a-dex-part-4.md');
   assert.deepEqual(entry.operations, { create: false, rename: false, delete: false });
   assert.deepEqual(entry.fields.map(field => field.name).sort(), ['body', 'date', 'description', 'part', 'readTime', 'series', 'title']);
   assert.equal(entry.fields.find(field => field.name === 'body').type, 'rich-text');
+});
+
+test('all three CMS entries point to their corresponding published articles', () => {
+  const require = createRequire(import.meta.url);
+  const yaml = createRequire(require.resolve('gray-matter'))('js-yaml');
+  const config = yaml.safeLoad(readFileSync(new URL('../.pages.yml', import.meta.url), 'utf8'));
+  assert.deepEqual(config.content.map(item => item.path), [
+    'content/posts/building-a-dex-part-3.md',
+    'content/posts/building-a-dex-part-4.md',
+    'content/posts/how-a-solana-zk-mixer-works-leafpay.md',
+  ]);
 });
 
 test('all three article figures render from Markdown, with prose retained', () => {
@@ -29,6 +40,16 @@ test('legacy animation markers still work', () => {
   assert.deepEqual(splitArticleFigures('before<!-- interactive:hotstuff -->after'), [
     { type: 'html', value: 'before' }, { type: 'figure', name: 'hotstuff' }, { type: 'html', value: 'after' },
   ]);
+});
+
+test('HotStuff and LeafPay Markdown figure links become the expected figures', () => {
+  for (const [file, expected] of [
+    ['building-a-dex-part-3.md', ['hotstuff-topology', 'hotstuff']],
+    ['how-a-solana-zk-mixer-works-leafpay.md', ['leafpay-private-withdrawal', 'leafpay-tree-rollup', 'leafpay-memo-indexing']],
+  ]) {
+    const { content } = matter(readFileSync(new URL(`../content/posts/${file}`, import.meta.url), 'utf8'));
+    assert.deepEqual(splitArticleFigures(marked.parse(content)).filter(s => s.type === 'figure').map(s => s.name), expected);
+  }
 });
 
 test('link labels and extra attributes may change without losing figures', () => {

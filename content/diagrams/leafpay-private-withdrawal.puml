@@ -1,0 +1,23 @@
+@startdot
+digraph MerkleMembership {
+  graph [bgcolor="#0B151B", rankdir=BT, pad="0.35", nodesep="0.42", ranksep="0.78", splines=polyline, ordering=out];
+  node [shape=box, style="rounded,filled", fillcolor="#102129", color="#52737A", fontcolor="#D9E7E5", fontname="DejaVu Sans Mono", fontsize=15, margin="0.20,0.14", penwidth=1.5];
+  edge [dir=none, color="#52737A", penwidth=2];
+
+  L0 [label="L0\ncommitment"];
+  L1 [label="L1\ncommitment"];
+  L2 [label="L2\nyour note", fillcolor="#123C38", color="#60E1C2"];
+  L3 [label="L3\nsibling", fillcolor="#382919", color="#F6B26B"];
+  H01 [label="H(L0, L1)\nsibling hash", fillcolor="#382919", color="#F6B26B"];
+  H23 [label="H(L2, L3)", fillcolor="#123C38", color="#60E1C2"];
+  Root [label="Merkle root\nH(H01, H23)", fillcolor="#123C38", color="#60E1C2"];
+
+  {rank=same; L0; L1; L2; L3;}
+  L0 -> H01;
+  L1 -> H01;
+  L2 -> H23 [color="#60E1C2", penwidth=3];
+  L3 -> H23 [color="#F6B26B", penwidth=2.5];
+  H01 -> Root [color="#F6B26B", penwidth=2.5];
+  H23 -> Root [color="#60E1C2", penwidth=3];
+}
+@enddot

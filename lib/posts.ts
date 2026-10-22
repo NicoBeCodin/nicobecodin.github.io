@@ -2,6 +2,7 @@ import matter from 'gray-matter';
 import { marked } from 'marked';
 import firstPost from '@/content/posts/building-a-dex-part-1.md?raw';
 import secondPost from '@/content/posts/building-a-dex-part-2.md?raw';
+import leafPayPost from '@/content/posts/how-a-solana-zk-mixer-works-leafpay.md?raw';
 import thirdPost from '@/content/posts/building-a-dex-part-3.md?raw';
 import fourthPost from '@/content/posts/building-a-dex-part-4.md?raw';
 
@@ -21,6 +22,7 @@ export type Post = {
 const sources: Record<string, string> = {
   'building-a-dex-part-1': firstPost,
   'building-a-dex-part-2': secondPost,
+  'how-a-solana-zk-mixer-works-leafpay': leafPayPost,
   'building-a-dex-part-3': thirdPost,
   'building-a-dex-part-4': fourthPost,
 };
@@ -42,7 +44,7 @@ export function getPosts(): Post[] {
       slug,
       title: String(data.title),
       description: String(data.description),
-      date: String(data.date),
+      date: data.date instanceof Date ? data.date.toISOString().slice(0, 10) : String(data.date),
       series: typeof data.series === 'string' ? data.series : undefined,
       part: data.part === undefined ? undefined : Number(data.part),
       topic: typeof data.topic === 'string' ? data.topic : undefined,

@@ -1,6 +1,48 @@
 # Private editing is handled by Pages CMS + GitHub authentication, not this file.
 # Saves on main trigger the existing GitHub Pages deployment.
 content:
+  - name: dex-hotstuff
+    label: Making sense of HotStuff
+    type: file
+    path: content/posts/building-a-dex-part-3.md
+    format: yaml-frontmatter
+    operations:
+      create: false
+      rename: false
+      delete: false
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: description
+        label: Summary
+        type: text
+        required: true
+      - name: date
+        label: Publication date
+        type: string
+        readonly: true
+      - name: series
+        label: Series
+        type: string
+        readonly: true
+      - name: part
+        label: Internal series order
+        type: number
+        readonly: true
+      - name: readTime
+        label: Reading time
+        type: string
+      - name: body
+        label: Article
+        type: rich-text
+        required: true
+        description: Keep the two standalone Figure links; they render the diagram and animation on the website.
+        options:
+          format: markdown
+          switcher: true
+          media: false
   - name: dex-optimizations
     label: Optimization tricks for a DEX validator
     type: file
@@ -42,6 +84,44 @@ content:
           Edit the prose here. Keep the three standalone Figure links in place:
           they become the animations and benchmark chart on the website.
           Saving on main publishes the article after the site build succeeds.
+        options:
+          format: markdown
+          switcher: true
+          media: false
+  - name: leafpay
+    label: "How a Solana ZK mixer works: building LeafPay"
+    type: file
+    path: content/posts/how-a-solana-zk-mixer-works-leafpay.md
+    format: yaml-frontmatter
+    operations:
+      create: false
+      rename: false
+      delete: false
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: description
+        label: Summary
+        type: text
+        required: true
+      - name: date
+        label: Publication date
+        type: string
+        readonly: true
+      - name: topic
+        label: Topic
+        type: string
+        readonly: true
+      - name: readTime
+        label: Reading time
+        type: string
+      - name: body
+        label: Article
+        type: rich-text
+        required: true
+        description: Keep the three standalone Figure links; they render the diagrams on the website.
         options:
           format: markdown
           switcher: true

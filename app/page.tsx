@@ -25,8 +25,9 @@ const projects = [
     title: 'LeafPay',
     label: 'Solana · zero knowledge',
     description: 'A privacy-pool prototype that made the final round of a Colosseum hackathon. It taught me a lot about the gap between a prototype and production.',
-    href: '/projects/#leafpay',
-    action: 'Read about the project',
+    href: '/writing/how-a-solana-zk-mixer-works-leafpay',
+    action: 'Read the article',
+    sourceLink: 'https://github.com/NicoBeCodin/solana_mixer',
   },
 ];
 
@@ -70,7 +71,7 @@ export default function Home() {
 
     <section className="home-section" id="projects" aria-labelledby="projects-heading">
       <div className="home-section-heading"><div><span className="section-kicker">PROJECTS</span><h2 className="sr-only" id="projects-heading">Projects</h2></div><a className="section-link" href="/projects/">More projects <ArrowUpRight size={17}/></a></div>
-      <div className="home-projects">{projects.map((project) => 'sourceLink' in project ? <div className="home-project" key={project.number}><span className="home-project-number">{project.number}</span><div><span className="home-item-meta">{project.label}</span><h3>{project.title}</h3><p>{project.description}</p><div className="home-project-links"><a className="home-item-action" href={`${project.href}/`}>{project.action} <ArrowUpRight size={16}/></a><a className="home-item-action" href={project.sourceLink} target="_blank" rel="noreferrer">View source <ArrowUpRight size={16}/></a></div></div></div> : <a className="home-project" href={project.href} key={project.number}><span className="home-project-number">{project.number}</span><div><span className="home-item-meta">{project.label}</span><h3>{project.title}</h3><p>{project.description}</p><span className="home-item-action">{project.action} <ArrowUpRight size={16}/></span></div></a>)}</div>
+      <div className="home-projects">{projects.map((project) => 'sourceLink' in project ? <div className="home-project" key={project.number}><span className="home-project-number">{project.number}</span><div><span className="home-item-meta">{project.label}</span><h3>{project.title}</h3><p>{project.description}</p><div className="home-project-links"><a className="home-item-action" href={`${project.href}/`}>{project.action} <ArrowUpRight size={16}/></a><a className="home-item-action" href={project.sourceLink} target="_blank" rel="noreferrer">{project.title === 'LeafPay' ? 'On-chain program' : 'View source'} <ArrowUpRight size={16}/></a></div></div></div> : <a className="home-project" href={project.href} key={project.number}><span className="home-project-number">{project.number}</span><div><span className="home-item-meta">{project.label}</span><h3>{project.title}</h3><p>{project.description}</p><span className="home-item-action">{project.action} <ArrowUpRight size={16}/></span></div></a>)}</div>
       <p className="highload-note">I also like a good performance puzzle. You can find my challenge work on <a href="https://highload.fun/users/nicobecodin/overview" target="_blank" rel="noreferrer">HighLoad.fun / @nicobecodin <ArrowUpRight size={15}/></a>.</p>
     </section>
 
