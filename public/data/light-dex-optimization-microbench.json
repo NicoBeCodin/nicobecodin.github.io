@@ -1,0 +1,28 @@
+{
+  "source_repository": "NicoBeCodin/light_dex",
+  "source_reports": [
+    "docs/state-mempool-optimization-2026-10-15.md",
+    "docs/trading-path-optimization-2026-10-16.md"
+  ],
+  "snapshot": {
+    "fixture": "10,000 accounts and 10,000 resting orders",
+    "samples_per_operation": 100,
+    "statistic": "median",
+    "unit": "microseconds",
+    "before_full_snapshot": 1965,
+    "after_persistent_fork": 0.364,
+    "note": "Snapshot creation only; not transaction execution or end-to-end throughput."
+  },
+  "quote_refresh": {
+    "fixture": "Eight cancels and eight placements",
+    "samples_per_path": 300,
+    "statistic": "median",
+    "unit": "microseconds",
+    "paths": [
+      { "name": "Standalone execution plus final root", "individual_transactions": 833.94, "atomic_quote_batch": 243.77 },
+      { "name": "Proposal build", "individual_transactions": 464.42, "atomic_quote_batch": 340.30 },
+      { "name": "Independent follower validation", "individual_transactions": 277.41, "atomic_quote_batch": 272.24 }
+    ],
+    "note": "Local execution microbenchmark without signatures or network. Individual transactions and one batch perform the same cancel/place instructions but use different transaction and nonce counts."
+  }
+}

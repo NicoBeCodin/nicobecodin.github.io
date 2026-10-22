@@ -126,7 +126,7 @@ a:focus-visible { outline-color: var(--orange); }
 .article-diagram img { margin: 0; width: 100%; }
 .article-diagram figcaption { color: #91aab0; font: 12px/1.6 var(--font-mono); margin-top: 10px; }
 .article-diagram-wide { width: min(920px, calc(100vw - 44px)); max-width: none; margin-left: 50%; transform: translateX(-50%); overflow-x: auto; }
-.article-diagram-wide img { min-width: 620px; }
+.article-diagram-wide img, .article-diagram-wide svg { min-width: 620px; }
 .article-body > .article-prose-section:first-child > p:first-child { font: 500 27px/1.47 var(--font-sans); color: var(--ink); }
 .article-walkthrough { margin: 38px 0 44px; border: 1px solid #36515a; border-radius: 10px; overflow: hidden; background: #0b151b; }
 .walkthrough-heading { padding: 23px 24px 10px; }

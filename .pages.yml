@@ -81,8 +81,8 @@ content:
         type: rich-text
         required: true
         description: >-
-          Edit the prose here. Keep the three standalone Figure links in place:
-          they become the animations and benchmark chart on the website.
+          Edit the prose here. Keep the five standalone Figure links in place:
+          they become the animations and benchmark charts on the website.
           Saving on main publishes the article after the site build succeeds.
         options:
           format: markdown

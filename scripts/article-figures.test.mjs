@@ -29,10 +29,10 @@ test('all three CMS entries point to their corresponding published articles', ()
   ]);
 });
 
-test('all three article figures render from Markdown, with prose retained', () => {
+test('all five optimization article figures render from Markdown, with prose retained', () => {
   const { content } = matter(readFileSync(new URL('../content/posts/building-a-dex-part-4.md', import.meta.url), 'utf8'));
   const sections = splitArticleFigures(marked.parse(content));
-  assert.deepEqual(sections.filter(s => s.type === 'figure').map(s => s.name), ['state-sharing', 'merkle', 'capacity']);
+  assert.deepEqual(sections.filter(s => s.type === 'figure').map(s => s.name), ['state-sharing', 'sharing-benchmark', 'merkle', 'quote-batching', 'capacity']);
   assert(sections.filter(s => s.type === 'html').map(s => s.value).join('').includes('What&#39;s next'));
 });
 

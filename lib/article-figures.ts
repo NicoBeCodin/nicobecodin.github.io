@@ -1,4 +1,4 @@
-export const figureNames = ['hotstuff', 'hotstuff-topology', 'state-sharing', 'merkle', 'capacity', 'leafpay-private-withdrawal', 'leafpay-tree-rollup', 'leafpay-memo-indexing'] as const;
+export const figureNames = ['hotstuff', 'hotstuff-topology', 'state-sharing', 'sharing-benchmark', 'merkle', 'quote-batching', 'capacity', 'leafpay-private-withdrawal', 'leafpay-tree-rollup', 'leafpay-memo-indexing'] as const;
 export type FigureName = typeof figureNames[number];
 export type ArticleSection = { type: 'html'; value: string } | { type: 'figure'; name: FigureName };
 

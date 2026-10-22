@@ -1,4 +1,5 @@
 import { HotstuffWalkthrough, MerkleWalkthrough, StateSharingWalkthrough } from './article-interactives';
+import { QuoteBatchingFigure, StructuralSharingFigure } from './article-benchmark-figures';
 import { splitArticleFigures } from '../lib/article-figures';
 
 function CapacityFigure() {
@@ -25,7 +26,9 @@ const figures = {
     caption="Who receives the votes during one phase. In HotStuff, the leader collects them and sends a certificate back."
   />,
   'state-sharing': StateSharingWalkthrough,
+  'sharing-benchmark': StructuralSharingFigure,
   merkle: MerkleWalkthrough,
+  'quote-batching': QuoteBatchingFigure,
   capacity: CapacityFigure,
   'leafpay-private-withdrawal': () => <StaticFigure
     src="/diagrams/leafpay-private-withdrawal.svg" width={780} height={432} wide

@@ -29,6 +29,10 @@ For a transfer in an exchange with thousands of accounts, the transaction stages
 
 The fork provides an isolated place to try a state transition. Pointer indirection, allocations along modified paths and copying inside touched values still cost something.
 
+The difference is pretty stark when the exchange has 10,000 accounts and 10,000 resting orders. Creating the old snapshot took 1.965 ms in the focused benchmark. The persistent fork took 0.364 µs. That's the cost of *making the snapshot*, not the cost of executing an order against it.
+
+[Figure: Snapshot time before and after structural sharing](#figure-sharing-benchmark)
+
 In a later four-validator profile, creating the proposal forks took about 29 ms over the whole run. Executing the transactions took about 1.36 seconds. At that point, keeping the fork for rollback seemed worth its small share of the time.
 
 ## Hashing what changed
@@ -73,6 +77,10 @@ The mempool now maintains indexes as transactions arrive: by digest, arrival ord
 
 The exchange also indexes order ownership and account-to-market relationships. Each index saves lookups but adds redundant data to maintain alongside the orders and positions.
 
+Market makers have another repetitive job: cancel old quotes and place new ones. `UpdateQuotes` can put up to 32 cancels and placements in one signed transaction, using one nonce. I compared eight cancels plus eight placements sent individually against one atomic quote batch. The standalone execution path improved a lot, but the gain was smaller when I measured proposal building and almost disappeared in follower validation. Batching saves work, but it doesn't make the whole chain 3.4 times faster.
+
+[Figure: Quote refresh with individual transactions and an atomic batch](#figure-quote-batching)
+
 I then tested the whole cluster with order traffic to see where it would start falling behind.
 
 ## What the laptop actually sustained
@@ -87,8 +95,6 @@ Compared with the early versions where I was seeing roughly 300 TPS, I'm now aro
 
 At 2,600 requested TPS, it achieved about 2,593 successful transactions per second over two minutes. The p95 delay from the scheduled submission time to durable commit was 310 ms, meaning 95% of the measured transactions finished within that time. All 312,000 scheduled originals were matched to commits, and all four journals replayed to the same state.
 
-[Figure: Laptop benchmark results](#figure-capacity)
-
 At 2,800 requested TPS, throughput increased to about 2,771, but p95 reached 796 ms and the sampled mempool peaked at 2,388 transactions. The driver delivered every scheduled slot. The chain kept committing, but transactions spent longer waiting. Since this is a trading chain, my goal was to always have a p95 of under 500ms. 
 
 Some earlier runs were limited by the driver itself as it was handling about 500 different accounts all submitting transactions at various intervals. The load generator shares the laptop with the validators too. These runs tell me what this setup handles, not what a cluster on separate machines would handle.
@@ -102,3 +108,9 @@ I'd like to execute independent transactions in parallel, along the lines of Sol
 Leader handoffs could use more work too. Pending transactions already get forwarded in bounded batches when the primary changes. One next step would be sending eligible transactions to the upcoming leader before rotation, giving it a warm queue rather than waiting for the switch. Any precomputed execution would still need to match the actual parent state.
 
 Finally, the journal has its own thread, but waiting for durability still delays state-dependent work. I'd like to see how much useful incoming-message work the node can do during that wait. There is still plenty to try before reaching for a bigger laptop and/or running on an actual network.
+
+## Where it stands
+
+For now, the result I can defend is about 2,593 successful transactions per second across six markets, with a 310 ms p95 to durable commit on four local validators. Asking for 2,800 TPS got more transactions through, but missed my 500 ms latency target. That's where the laptop stands today, not a limit I've established for Light DEX on other machines.
+
+[Figure: Laptop benchmark results](#figure-capacity)

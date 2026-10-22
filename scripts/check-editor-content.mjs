@@ -5,7 +5,7 @@ import { marked } from 'marked';
 
 const articles = [
   { file: 'building-a-dex-part-3.md', figures: ['hotstuff-topology', 'hotstuff'] },
-  { file: 'building-a-dex-part-4.md', figures: ['state-sharing', 'merkle', 'capacity'] },
+  { file: 'building-a-dex-part-4.md', figures: ['state-sharing', 'sharing-benchmark', 'merkle', 'quote-batching', 'capacity'] },
   { file: 'how-a-solana-zk-mixer-works-leafpay.md', figures: ['leafpay-private-withdrawal', 'leafpay-tree-rollup', 'leafpay-memo-indexing'] },
 ];
 
