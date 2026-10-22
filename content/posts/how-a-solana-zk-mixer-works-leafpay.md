@@ -1,16 +1,16 @@
 ---
 title: "How a Solana ZK mixer works: building LeafPay"
-description: How LeafPay used commitments, browser-generated proofs, memo-based
-  indexing and nullifier shards in a Solana privacy-pool prototype.
-date: 2026-10-02
-topic: Solana / zero knowledge
-readTime: 12 min read
+description: "How LeafPay uses Merkle commitments, browser-generated proofs, Solana memos and sharded nullifiers to make private withdrawals possible."
+date: "2026-10-02"
+topic: "Solana / zero knowledge"
+readTime: "12 min read"
 ---
-Blockchains publish transactions so anyone can check what happened. A privacy pool tries to preserve that verifiability by unlinking a depositor from a withdrawer. How can a program check that a withdrawal is legitimate if it cannot see the deposit being spent?
 
-I explored that question with **LeafPay**, an open-source Solana ZK mixer I built for a Colosseum hackathon in June 2025. I set out to build the first open-source mixer of this kind on Solana. The project reached a final-round interview with the Solana Foundation, although it did not make it further. More importantly, it forced a set of practical design questions: how does a client find the data needed to create a proof, how much tree state belongs on-chain, and how do you record spent notes without creating an account for every withdrawal?
+On a blockchain, anyone can follow the money. That is useful for verifying transactions, but less useful when you want to pay someone without publishing the link between your wallet and theirs. A mixer breaks that link. The interesting question is how it can still tell a real withdrawal from someone asking for money they never deposited.
 
-The [on-chain program is on GitHub](https://github.com/NicoBeCodin/solana_mixer). This article explains the hackathon prototype's intended design, and doesn't encourage any illicit behaviour. Currently, the published program does not yet propagate proof-verification failures, so the implementation does not enforce the security property described below.
+I tried to answer that with **LeafPay**, an open-source Solana ZK mixer I built for a Colosseum hackathon in June 2025. I wanted to build the first open-source mixer of this kind on Solana. It made it to a final-round interview with the Solana Foundation, but no further. By then, the question I had started with had split into several: where does a browser get the data to make a proof? How much of that data belongs on-chain? And where do you put the growing list of notes that have already been spent?
+
+The [on-chain program is on GitHub](https://github.com/NicoBeCodin/solana_mixer). **Please don't deposit funds into it.** The published code discards proof-verification failures, so it cannot safely enforce the withdrawal rules described here. This article is about the design and the engineering problems it led me to, not a usable privacy service.
 
 ## The core trick: prove a deposit without pointing to it
 
@@ -22,21 +22,21 @@ commitment = Poseidon(amount, private_nullifier, asset_id)
 
 For the implemented SOL pool, `asset_id` is zero. The value of the commitment can be published without publishing the private nullifier. Each deposit adds a commitment as a leaf in a Merkle tree. Pairwise hashes build up to a root that commits to the entire set of leaves.
 
-A valid withdrawal proof should establish, roughly, that the prover knows a note whose commitment belongs to the tree represented by an accepted root. The prover supplies a Merkle path privately to a Groth16 circuit. The circuit checks the path and exposes a nullifier hash, derived from the private nullifier, as a public output. In the intended flow, the program verifies the proof and rejects a nullifier hash that has already been used.
+A withdrawal proof is meant to show that the person withdrawing knows a note whose commitment is in that tree, without saying *which* commitment it is. The browser gives the note and its Merkle path to a Groth16 circuit as private inputs. The circuit checks the path and reveals a **nullifier hash**, derived from the private nullifier. The program should verify the proof and reject a nullifier hash it has already seen.
 
 That is the zero-knowledge part: the browser proves a statement about private inputs (the note and its path) without handing those inputs to the program. Groth16 produces a succinct proof for a fixed circuit. Its verifier does not need to inspect every deposit, although proving still requires the browser to obtain and hash the data for a valid path. In a depth-30 binary tree, that path contains 30 sibling positions, not a billion leaves.
 
-That distinction matters: the private nullifier is not published; its hash is the one-time marker stored on-chain. Reusing the note produces the same public marker, so a second spend fails without revealing which commitment was spent.
+The private nullifier never goes on-chain. Its hash is the one-time marker: spend the same note again and you get the same marker, which the program can reject without learning which deposit it came from.
 
 The small tree below shows why a path is enough. To prove that `L2` belongs to the root, start with `L2`, combine it with sibling `L3` to obtain `H23`, then combine that with sibling hash `H01` to recompute the root. A proof can check those steps while keeping the chosen leaf and its siblings private.
 
 [Figure: Private withdrawal proof](#figure-leafpay-private-withdrawal)
 
-This hides the cryptographic link between a note and its spend; it does not guarantee complete anonymity. Amounts, timing, pool size, RPC access and the way a recipient pays transaction fees can still reveal information. Variable amounts, in particular, may make a deposit and withdrawal easier to correlate. A relayer can pay the withdrawal fee for a fresh recipient address, but that only addresses one source of linkage.
+The proof hides the cryptographic link, not every clue around it. If one person deposits 7.13 SOL and someone withdraws 7.13 SOL shortly afterward, the amounts and timing may give them away. The size of the pool, RPC access, and who pays the withdrawal fee matter too. A relayer can pay that fee for a fresh recipient address, but it cannot make the other clues disappear.
 
 ## Why LeafPay proves deposits too
 
-[Tornado Cash Classic](https://docs.tornado.cash/tornado-cash-classic/circuits/core-deposit-circuit) uses fixed denominations and does not need a ZK proof for its ordinary deposit. LeafPay took a different route: it allowed variable SOL amounts and included a deposit-proof check intended to bind the published commitment or commitments to the amount transferred into the pool. The browser builds that proof; enforcing its validity on-chain remains part of the security work described above.
+[Tornado Cash Classic](https://docs.tornado.cash/tornado-cash-classic/circuits/core-deposit-circuit) uses fixed denominations and does not need a ZK proof for an ordinary deposit. I wanted LeafPay to accept variable SOL amounts, so the deposit path also builds a proof to tie the commitment or commitments to the amount going into the pool. That made deposits more flexible, but it gave me another proof and another set of public inputs to get right.
 
 The circuits also support consuming one note and creating a new commitment for the remainder of a partial withdrawal:
 
@@ -48,11 +48,11 @@ new note:  7 SOL, with a new private nullifier
 
 The old nullifier hash is recorded as spent and the new commitment is added to the tree. This is a useful property of the note model: a withdrawal does not have to consume the entire balance. It also adds more things to get right: value conservation in the circuit, a fresh secret for the change note, and correct ordering of the payout and new leaf.
 
-The code contains transfer and combine flows as well as direct and relayed withdrawals. The implemented pool handles native SOL; although the commitment includes an asset identifier, support for arbitrary tokens was a design direction, not a finished feature.
+I also added transfer and combine flows, plus direct and relayed withdrawals. The pool itself handles native SOL. I included an asset identifier in the commitment because I wanted to explore other tokens later; the program does not support them yet.
 
 ## Keeping the Merkle state small
 
-A naïve implementation could store every leaf in one on-chain account and rebuild the whole tree after each deposit. That would make both account size and computation grow with the pool. LeafPay instead keeps a 16-leaf in-flight batch plus a collection of Merkle peaks in the pool account.
+The obvious way to build the tree is to keep every leaf in one on-chain account and rebuild it after each deposit. That stops looking attractive as the pool grows: both the account and the work per deposit keep getting bigger. LeafPay keeps a 16-leaf in-flight batch and a collection of Merkle peaks instead.
 
 For each new commitment, the program updates the small batch root. When the batch fills, its root is folded into the peaks. Equal-height peaks are merged, much like carrying a bit in binary addition. The number of peaks grows logarithmically rather than with the number of deposits. The program also derives a current root that can be checked against a withdrawal proof.
 
@@ -60,13 +60,13 @@ Think of each completed 16-leaf batch as one small tree. After six completed bat
 
 [Figure: Rolling up the Merkle tree](#figure-leafpay-tree-rollup)
 
-The practical saving is not that hashing disappears. The small batch is recomputed as leaves arrive, and merging peaks can still take logarithmically many hashes at a rollover. The saving is that the on-chain program does **not** need to retain and rehash every historical leaf on each insertion.
+There is still hashing to do. The small batch gets recomputed as leaves arrive, and a rollover can merge several peaks. But the program does **not** need to keep and rehash every historical leaf each time someone deposits.
 
 ## The client-side problem: finding your Merkle path
 
-The root alone is enough for a verifier, but not for a prover. To prove that a leaf belongs to the tree, the browser needs its sibling hashes along the path to the root. Where do those come from if the program deliberately does not store all leaves?
+The root is enough to check a proof, but not enough to make one. To build a Merkle path, the browser needs the sibling hashes between its leaf and the root. We just decided not to keep every leaf in the pool account. So where does the browser find them?
 
-Ethereum contracts can expose deposit data through logs. [Tornado's documentation describes reconstructing tree state from emitted events](https://docs.tornado.cash/tornado-cash-classic/circuits/anonymity-mining/tornado-trees). LeafPay used a Solana-specific route: Memo instructions plus an indexing account.
+Ethereum contracts can expose deposit data through logs; [Tornado describes rebuilding its tree from emitted events](https://docs.tornado.cash/tornado-cash-classic/circuits/anonymity-mining/tornado-trees). On Solana, I tried a combination I had not expected to use in a privacy project: Memo instructions and an indexing account.
 
 At each eight-leaf boundary, the transaction carries a Base64-encoded memo containing an eight-byte batch number and eight 32-byte commitments. The program checks that the memo matches its current leaves and that the transaction includes the expected `leaves_indexer` program-derived address (PDA). A browser can then query `getSignaturesForAddress` for that PDA, read the memos, and replay the commitments locally to build a Merkle path. The Solnado frontend does this in the browser alongside Groth16 proof generation.
 
@@ -74,30 +74,30 @@ One fetched memo gives the browser eight leaves. It can hash those leaves into a
 
 [Figure: Finding leaves from memos](#figure-leafpay-memo-indexing)
 
-One 1,000-signature page could contain up to 8,000 leaves at eight leaves per memo. That is **capacity arithmetic**, not a benchmark or a promise that one RPC request will always return a complete usable history. The current browser code paginates through the leaf-indexer signatures and reconstructs the leaves it finds. Solana's [public RPC endpoints have variable rate limits and are not recommended as production infrastructure](https://solana.com/docs/references/clusters). Nor does avoiding a project-operated indexer mean avoiding third-party RPC providers altogether.
+At eight leaves per memo, a page of 1,000 signatures could point to as many as 8,000 leaves. That is just the arithmetic, not a measured download speed. The browser currently pages through the leaf-indexer signatures and rebuilds the tree from the leaves it finds. It still needs RPC access, and [public RPC endpoints have variable rate limits](https://solana.com/docs/references/clusters). The useful distinction is that LeafPay does not need its *own* server to tell the browser which leaf exists or to construct its proof.
 
-There is also a trust boundary here. A read-only account can be included in an unrelated transaction, so a client must not treat every signature returned for that address as a valid LeafPay deposit. [Solana's indexing guidance makes the same warning](https://solana.com/docs/tools/actions). LeafPay checks the required memo on the deposit path; a robust reader should also validate the transaction and its ordering rather than trusting an arbitrary memo string.
+There is a catch. Anyone can include a read-only address in an unrelated transaction. A signature returned for the indexing account is therefore not automatically a LeafPay deposit. The program checks the required memo when accepting a deposit, but the browser should also verify the transaction and its place in the sequence rather than trusting any memo it finds. [Solana's indexing guidance discusses this distinction](https://solana.com/docs/tools/actions).
 
-### A potential scaling idea 
+### The next step for a much bigger tree
 
 The program has a second `subtree_indexer` PDA and a path for posting a subtree root after 4,096 full 16-leaf batches (65,536 leaves). The idea is to fetch the leaves around *your* note and use posted subtree roots for the rest of a much larger tree, instead of downloading every historical leaf. A depth-30 tree would hold about a billion leaves.
 
-The frontend, however, still fetches leaf memos for its witness-building path; its subtree-indexer reconstruction branch is marked for future integration. The proposed layout could reduce how much history a client must fetch, but I have not implemented or benchmarked that shortcut, so I cannot give it a reliable RPC-call bound yet.
+The frontend does not use those subtree roots to build a witness yet; it still fetches leaf memos. The on-chain checkpoint is there, but the browser-side shortcut is unfinished. I would like to measure how much history it actually saves once that path is wired up, rather than guess at an RPC-call count.
 
 ## Storing the one-time markers
 
-Every successful spend leaves a public nullifier hash behind. A simple design would create one Solana PDA per nullifier. LeafPay instead groups hashes into shard accounts. Each shard owns a prefix of the nullifier-hash space and holds a sorted vector; binary search detects duplicates and finds the insertion point. The user supplies the shard account, and the program checks that its prefix and PDA are the right ones for the hash.
+Every spend leaves a public nullifier hash behind. I could have created one Solana PDA for each hash, but that felt like a lot of accounts just to answer “have we seen this before?” LeafPay groups hashes into shard accounts instead. Each shard owns a prefix of the hash space and keeps its hashes sorted, so binary search can find a duplicate or the insertion point. The user supplies the shard account; the program checks that the prefix and PDA match the hash.
 
-The intended next step is to split a shard into two child prefixes when it fills. This trades many small account creations for fewer growing accounts, but integration of that split path was not finished in the prototype.
+When a shard fills, the plan is to split it into two child prefixes. That split path is not fully integrated yet. The idea is simple, though: pay for fewer, fuller accounts instead of creating a new account for every spend.
 
-## What this taught me
+## The ideas that stuck with me
 
-The most surprising part was that the ZK circuit was only one piece of the system. A proof is useful only if the client can reconstruct its witness from available data, the program checks the right public inputs, and the note can be spent exactly once. Memo indexing, tree rollups and nullifier storage are all parts of that same problem. I explored practical approaches to each, though some of the scaling work remained theoretical.
+I started LeafPay thinking mostly about zero-knowledge proofs. I finished the hackathon thinking about all the less glamorous things around a proof. Someone has to make the witness data findable. The tree has to keep growing without becoming too expensive to update. Spent notes have to stay spent without leaving a trail of tiny accounts everywhere.
 
-The hackathon also pulled me out of solo-building mode. I met people in the French crypto community, which I am grateful for; working on a project alone can be grueling at times. I spent most of the event engineering and too little time explaining why the work mattered. Communicating a project's value is part of building it, and that was a useful lesson to take away.
+The solutions I enjoyed most were the ones that changed the shape of the problem. Shard the nullifiers instead of giving each one a PDA. Put leaf data in memos and make it discoverable through an indexing address instead of standing up a LeafPay server. Roll completed batches into Merkle peaks instead of storing the whole tree. None of those ideas is magic, and the browser-side indexing still needs work. But they made me interested in how far careful data layout can get you before you need another service in the middle.
 
-LeafPay is a hackathon prototype, not a privacy guarantee. Its on-chain proof checks need correction and tests before anyone should use it with funds. The demo frontend's note storage and relayer setup also need a security redesign, and neither the circuits nor the Solana program have been audited. Small anonymity sets and public metadata remain privacy constraints even with a sound proof system. The useful result of the project was learning which parts of “a mixer” live outside the cryptography. The [on-chain implementation](https://github.com/NicoBeCodin/solana_mixer) is open for inspection.
+The hackathon also got me talking to people in the French crypto community after a long stretch of building alone. I spent most of the event on the code and probably not enough time explaining why these choices mattered. Writing this is partly my attempt to do that now.
 
 ### A later Solana change
 
-This was built for the June 2025 hackathon, when the 1,232-byte transaction limit made packing proofs, accounts and memos painful. [Solana activated 4,096-byte v1 transactions in September 2026](https://solana.com/upgrades/larger-transaction-sizes). That gives a future version more room, but it does not retroactively change the 2025 design or fix the indexing and safety work still needed here.
+In June 2025, the 1,232-byte transaction limit made fitting proofs, accounts and memos into a transaction a recurring headache. [Solana activated 4,096-byte v1 transactions in September 2026](https://solana.com/upgrades/larger-transaction-sizes). I would be curious to revisit some of those trade-offs with the extra room.
