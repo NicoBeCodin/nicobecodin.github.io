@@ -1,13 +1,13 @@
 ---
-title: "Making sense of HotStuff"
-description: "Working through HotStuff in Rust, from the first proposal to replacing a leader and catching up a node that fell behind."
-date: "2026-10-20"
-series: "Building Light DEX"
+title: Making sense of HotStuff
+description: Working through HotStuff in Rust, from the first proposal to
+  replacing a leader and catching up a node that fell behind.
+date: 2026-10-20
+series: Building Light DEX
 part: 3
-readTime: "8 min read"
+readTime: 8 min read
 ---
-
-The project is on [GitHub](https://github.com/NicoBeCodin/light_dex) if you want to try it yourself. It includes a control plane UI where you can launch nodes, switch between PBFT and HotStuff, add market participants and kill a leader to see what happens. You can mess around with it without writing a test harness first.
+The project is on [GitHub](https://github.com/NicoBeCodin/light_dex) if you want to try it yourself. It includes a control plane UI where you can launch nodes, switch between PBFT and HotStuff, add market participants and kill a leader to see what happens. 
 
 After [adding the exchange](/writing/building-a-dex-part-2), I wanted to try another consensus algorithm. The exchange already handled balances and orders separately from consensus, so I could keep that code and work on how the nodes agreed on blocks. HotStuff seemed like a good next step after PBFT.
 
@@ -17,15 +17,17 @@ I'll go through the version currently in Light DEX, using four validators and on
 
 ## Why change PBFT?
 
-In my [PBFT implementation](/writing/building-a-dex-part-1), replicas broadcast prepare and commit votes to one another. Each extra validator adds another sender and another recipient. That becomes a lot of traffic.
+In my [PBFT implementation](/writing/building-a-dex-part-1), replicas broadcast prepare and commit votes to one another. Each extra validator adds another sender and another recipient. That becomes a lot of traffic, scaling quadratically, meaning that for N nodes, there are about N² messages being exchanged per round.
 
-HotStuff collects phase votes at the leader. The leader sends back evidence of a quorum, so replicas can check the result without receiving every vote directly from its sender.
+HotStuff collects phase votes at the leader. The leader sends back evidence of a quorum, so replicas can check the result without receiving every vote directly from its sender. This means that each round has 2N messages (N from leader to nodes, 1 per node to the leader so N messages). Much better amirite.
 
 [Figure: PBFT and HotStuff vote paths](#figure-hotstuff-topology)
 
 My certificates contain individual Ed25519 signatures, so they grow with the number of voters. View-change messages are also still broadcasts. That means this implementation doesn't have the paper's linear communication cost.
 
-The [original paper](https://arxiv.org/abs/1803.05069) describes Basic and Chained HotStuff. I started with explicit phases for each block, closer to the Basic version. The chained version pipelines those phases across blocks; that isn't implemented here.
+The [original paper](https://arxiv.org/abs/1803.05069) describes Basic and Chained HotStuff. I started with explicit phases for each block, closer to the Basic version. The chained version pipelines those phases across blocks; that isn't implemented here. This is because here the main latency is from computation within the nodes and not network latency, which should become the main bottleneck for when we run a truly decentralized blockchain, at the moment, it's just localhost on my laptop. 
+
+
 
 ## Following one block
 
@@ -62,13 +64,11 @@ Light DEX keeps two certificates:
 
 The implementation's voting predicate accepts a proposal when the lock is the initial sentinel, the lock is below the proposed height, the digest matches the lock, or the justification comes from a later view. A separate `voted` map prevents another vote at the same `(view, height, phase)`.
 
-The height check works alongside the node's validation of the next block against its local chain. A version that kept several competing branches would also need to track their ancestry.
-
-A QC records the votes a node has seen. Its lock determines whether it can vote for the next proposal. The code is still a learning implementation, and I haven't formally verified its safety.
+The height check works alongside the node's validation of the next block against its local chain. A version that kept several competing branches would also need to track their ancestry. A QC records the votes a node has seen. Its lock determines whether it can vote for the next proposal. 
 
 ## The next leader needs evidence
 
-A view identifies a leader: in Light DEX, `view % node_count`. A timeout can trigger a new view. I also run benchmarks with a leader change every four committed blocks, so handoff gets exercised throughout the run.
+A view identifies a leader: in Light DEX, `view % node_count` (no stake weighted distribution of leadership). A timeout can trigger a new view. I also run benchmarks with a leader change every four committed blocks, so handoff gets exercised throughout the run.
 
 In `advance_view`, the node clears transient vote collection but retains its certificates. A NewView message carries `high_qc`. The next leader gathers a quorum of those reports and selects the highest certificate, ordered by height, view and phase.
 
@@ -76,13 +76,11 @@ It broadcasts StartView with signed evidence. If the selected certificate refers
 
 The new leader needs the actual block as well as its certificate. A digest tells it which block to look for, but doesn't supply the transactions.
 
-## “Expected sequence 221, got 261”
+## Falling behind
 
-One load test produced exactly that rejection. Several validators were behind, although none had been deliberately killed.
+One load test produced the error: "Expected sequence 221, got 261". Several validators were behind, although none had been deliberately killed. Despite that, other nodes were still committing blocks (remember the n > 3f + 1). A node expecting sequence 221 couldn't execute block 261 because it was missing the state changes in between. Sending it more recent proposals would just produce more rejections.
 
-The other nodes were still committing blocks. A node expecting sequence 221 couldn't execute block 261 because it was missing the state changes in between. Sending it more recent proposals would just produce more rejections.
-
-The recovery path lives in `src/node/sync.rs`. A node fetches batches of committed blocks and their certificates from a peer, checks that the sequence is continuous, then validates and applies them locally.
+The recovery path lives in `src/node/sync.rs`. A node fetches batches of committed blocks and their certificates from a peer, checks that the sequence is continuous, then validates and applies them locally. This will also be useful for when we want to add a node in the chain, but that's not a focus at the moment.
 
 Only after applying the missing blocks does it advance the consensus engine's expected height. The catch-up method retains vote and lock information: forgetting what the node has already signed could permit an unsafe later vote.
 
@@ -90,8 +88,8 @@ With four validators, three can keep the chain moving while the fourth falls beh
 
 ## Back to the exchange
 
-HotStuff still knows nothing about a bid, margin or a maker fee. It handles proposals and evidence. The exchange checks that executing an agreed sequence produces the claimed state.
+HotStuff still knows nothing about anything exchange related. It handles proposals and evidence. The exchange checks that executing an agreed sequence produces the claimed state.
 
-With the cluster running, I started looking at how much work went into preparing and committing a block. The exchange still had some expensive habits, starting with cloning the whole state before trying a transaction.
+With the cluster running, I started looking at how much work went into preparing and committing a block, since we have near to no communication latency on my own laptop. The exchange needed some optimizations as to make it run faster since 300 TPS isn't very impressive for a DEX.
 
 [Next: Optimization tricks for a DEX validator.](/writing/building-a-dex-part-4)
