@@ -23,7 +23,7 @@ The current `ExchangeState::fork()` shares the roots of persistent collections. 
 
 Accounts, markets and collateral use persistent maps. The order book uses persistent ordered price maps and FIFO sequences. When a fork changes one entry, the collection copies the affected paths or chunks and shares the untouched parts with the original.
 
-<!-- interactive:state-sharing -->
+[Figure: Shared exchange state](#figure-state-sharing)
 
 For a transfer in an exchange with thousands of accounts, the transaction stages just the two accounts it touches. The books remain shared. If validation fails, discard the candidate; the committed version still refers to the original data.
 
@@ -39,7 +39,7 @@ Light DEX now stores commitments in an incremental Merkle tree. A typed key iden
 
 Changing a leaf invalidates the hashes on its path to the root. Unchanged subtrees keep their cached hashes. The implementation is a compressed binary tree over hashed keys; the small balanced tree below illustrates the dependency rather than its exact shape.
 
-<!-- interactive:merkle -->
+[Figure: Incremental Merkle tree](#figure-merkle)
 
 There is another saving inside a block. Suppose Alice's account changes twenty times. The transactions must still execute in order, because later orders depend on earlier balances and nonces. But the final root only needs Alice's final value.
 
@@ -89,10 +89,7 @@ Compared with the early versions where I was seeing roughly 300 TPS, I'm now aro
 
 At 2,600 requested TPS, it achieved about 2,593 successful transactions per second over two minutes. The p95 delay from the scheduled submission time to durable commit was 310 ms, meaning 95% of the measured transactions finished within that time. All 312,000 scheduled originals were matched to commits, and all four journals replayed to the same state.
 
-<figure class="article-diagram">
-  <img src="/diagrams/light-dex-capacity.svg" width="900" height="540" loading="lazy" alt="Two four-validator runs: 2,600 requested TPS achieved 2,593 successful TPS and 310 millisecond p95 latency over 120 seconds. At 2,800 requested TPS, successful throughput was 2,771 and p95 latency rose to 796 milliseconds over 90 seconds." />
-  <figcaption>Same six-market workload and 64 submission workers; different run durations. Both delivered every scheduled slot and passed journal replay. The dashed line is the 500 ms latency target. <a href="/data/light-dex-capacity.json">Aggregate data and methodology</a>.</figcaption>
-</figure>
+[Figure: Laptop benchmark results](#figure-capacity)
 
 At 2,800 requested TPS, throughput increased to about 2,771, but p95 reached 796 ms and the sampled mempool peaked at 2,388 transactions. The driver delivered every scheduled slot. The chain kept committing, but transactions spent longer waiting.
 
