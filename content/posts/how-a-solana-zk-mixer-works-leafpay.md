@@ -1,16 +1,16 @@
 ---
 title: "How a Solana ZK mixer works: building LeafPay"
-description: "How LeafPay used commitments, browser-generated proofs, memo-based indexing and nullifier shards in a Solana privacy-pool prototype."
-date: "2026-10-02"
-topic: "Solana / zero knowledge"
-readTime: "12 min read"
+description: How LeafPay used commitments, browser-generated proofs, memo-based
+  indexing and nullifier shards in a Solana privacy-pool prototype.
+date: 2026-10-02
+topic: Solana / zero knowledge
+readTime: 12 min read
 ---
-
 Blockchains publish transactions so anyone can check what happened. A privacy pool tries to preserve that verifiability by unlinking a depositor from a withdrawer. How can a program check that a withdrawal is legitimate if it cannot see the deposit being spent?
 
 I explored that question with **LeafPay**, an open-source Solana ZK mixer I built for a Colosseum hackathon in June 2025. I set out to build the first open-source mixer of this kind on Solana. The project reached a final-round interview with the Solana Foundation, although it did not make it further. More importantly, it forced a set of practical design questions: how does a client find the data needed to create a proof, how much tree state belongs on-chain, and how do you record spent notes without creating an account for every withdrawal?
 
-The [on-chain program is on GitHub](https://github.com/NicoBeCodin/solana_mixer). This article explains the hackathon prototype's intended design, not an audited or currently hosted privacy service. **Do not deposit funds into it:** the published program does not yet propagate proof-verification failures, so the implementation does not enforce the security property described below.
+The [on-chain program is on GitHub](https://github.com/NicoBeCodin/solana_mixer). This article explains the hackathon prototype's intended design, and doesn't encourage any illicit behaviour. Currently, the published program does not yet propagate proof-verification failures, so the implementation does not enforce the security property described below.
 
 ## The core trick: prove a deposit without pointing to it
 
@@ -22,7 +22,7 @@ commitment = Poseidon(amount, private_nullifier, asset_id)
 
 For the implemented SOL pool, `asset_id` is zero. The value of the commitment can be published without publishing the private nullifier. Each deposit adds a commitment as a leaf in a Merkle tree. Pairwise hashes build up to a root that commits to the entire set of leaves.
 
-A valid withdrawal proof should establish, roughly, that the prover knows a note whose commitment belongs to the tree represented by an accepted root. The prover supplies a Merkle path privately to a Groth16 circuit. The circuit checks the path and exposes a **nullifier hash**, derived from the private nullifier, as a public output. In the intended flow, the program verifies the proof and rejects a nullifier hash that has already been used.
+A valid withdrawal proof should establish, roughly, that the prover knows a note whose commitment belongs to the tree represented by an accepted root. The prover supplies a Merkle path privately to a Groth16 circuit. The circuit checks the path and exposes a nullifier hash, derived from the private nullifier, as a public output. In the intended flow, the program verifies the proof and rejects a nullifier hash that has already been used.
 
 That is the zero-knowledge part: the browser proves a statement about private inputs (the note and its path) without handing those inputs to the program. Groth16 produces a succinct proof for a fixed circuit. Its verifier does not need to inspect every deposit, although proving still requires the browser to obtain and hash the data for a valid path. In a depth-30 binary tree, that path contains 30 sibling positions, not a billion leaves.
 
@@ -78,7 +78,7 @@ One 1,000-signature page could contain up to 8,000 leaves at eight leaves per me
 
 There is also a trust boundary here. A read-only account can be included in an unrelated transaction, so a client must not treat every signature returned for that address as a valid LeafPay deposit. [Solana's indexing guidance makes the same warning](https://solana.com/docs/tools/actions). LeafPay checks the required memo on the deposit path; a robust reader should also validate the transaction and its ordering rather than trusting an arbitrary memo string.
 
-### A scaling idea that was not finished in the browser
+### A potential scaling idea 
 
 The program has a second `subtree_indexer` PDA and a path for posting a subtree root after 4,096 full 16-leaf batches (65,536 leaves). The idea is to fetch the leaves around *your* note and use posted subtree roots for the rest of a much larger tree, instead of downloading every historical leaf. A depth-30 tree would hold about a billion leaves.
 
