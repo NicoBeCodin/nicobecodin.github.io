@@ -1,13 +1,13 @@
 ---
-title: "Optimization tricks for a DEX validator"
-description: "Finding where Light DEX spent its time as the books grew, and changing how it copies, hashes and executes exchange state."
-date: "2026-10-20"
-series: "Building Light DEX"
+title: Optimization tricks for a DEX validator
+description: Finding where Light DEX spent its time as the books grew, and
+  changing how it copies, hashes and executes exchange state.
+date: 2026-10-20
+series: Building Light DEX
 part: 4
-readTime: "8 min read"
+readTime: 8 min read
 ---
-
-The project is on [GitHub](https://github.com/NicoBeCodin/light_dex) if you want to try it yourself. The control plane UI lets you launch a local cluster, add market participants and watch the books, trades and node metrics as you increase the load. It's an easy way to mess around with the exchange and see where it starts struggling.
+The project is on [GitHub](https://github.com/NicoBeCodin/light_dex) if you want to try it yourself. The control plane UI lets you launch a local cluster, add market participants and watch the books, trades and node metrics as you increase the load. It's an easy way to mess around with the exchange and see where it starts struggling. 
 
 When I first [added the exchange](/writing/building-a-dex-part-2), the simplest way to handle a failed transaction was to clone the exchange first. Execute against the clone, keep it if everything succeeds, otherwise throw it away. That made it much easier to avoid leaving balances or orders half-updated.
 
@@ -17,9 +17,9 @@ As I added accounts, deeper books and perpetual positions, I started looking for
 
 ## Keeping the clone cheap
 
-Putting the exchange inside `Arc<ExchangeState>` would make another reference cheap. But if a speculative transaction then needs exclusive access to the whole value, we are back to copying it.
+Putting the exchange inside `Arc<ExchangeState>` would make another reference cheap. But if a speculative transaction, e.g a Fill Or Kill (FOK) order that only changes the book state if all of it's demand for liquidity is filled then needs exclusive access to the whole value, we are back to copying it.
 
-The current `ExchangeState::fork()` shares the roots of persistent collections. Here, “persistent” means an older version stays usable after an update. Disk storage is a separate concern.
+The current `ExchangeState::fork()` shares the roots of persistent collections. Here, "persistent" means an older version stays usable after an update. Disk storage is a separate concern.
 
 Accounts, markets and collateral use persistent maps. The order book uses persistent ordered price maps and FIFO sequences. When a fork changes one entry, the collection copies the affected paths or chunks and shares the untouched parts with the original.
 
@@ -35,7 +35,7 @@ In a later four-validator profile, creating the proposal forks took about 29 ms 
 
 The next expensive habit was computing a state digest by sorting and hashing the entire exchange. How could we commit to the result without rereading every unchanged balance?
 
-Light DEX now stores commitments in an incremental Merkle tree. A typed key identifies an account, order, market or another state entry. Its canonical byte encoding gives every node the same bytes to hash. Explicit domain tags distinguish kinds of hashes.
+Light DEX now stores commitments in an incremental Merkle tree, this is the same mechanism that is used on other blockchains like Ethereum.  A typed key identifies an account, order, market or another state entry. Its canonical byte encoding gives every node the same bytes to hash. Explicit domain tags distinguish kinds of hashes.
 
 Changing a leaf invalidates the hashes on its path to the root. Unchanged subtrees keep their cached hashes. The implementation is a compressed binary tree over hashed keys; the small balanced tree below illustrates the dependency rather than its exact shape.
 
@@ -63,9 +63,7 @@ The node publishes the prepared state after writing the block and certificate to
 
 The tests check that failure case, verify that changing a fork leaves the original untouched, and replay committed journals to compare state roots.
 
-This also made the economics of block building more concrete for me. Simulating transactions quickly gives a builder more room to compare candidate bundles and their fees or tips before its time runs out. That can help validator revenue, although the most profitable ordering isn't necessarily the best one for traders.
-
-It helped me understand the appeal of moving some of that work off the validator. [Jito's Block Engine and BAM](https://bam.dev/docs/bam/bam-overview/) handle bundle simulation and external scheduling respectively; [Harmonic](https://harmonic.gg/) offers remote block building. They move selection work elsewhere, freeing compute for other validator tasks. The validator still executes the selected transactions. The tradeoff is another dependency and more power over ordering in fewer hands. [Helius's introduction to Solana MEV](https://www.helius.dev/blog/solana-mev-an-introduction) explains the supply chain and why some ordering strategies, such as sandwiching, hurt users.
+This also made the economics of block building more concrete for me. Block execution and state computation are the most compute consuming parts of my program at the moment (though I haven't worked on execution parallelization yet). Computing optimal block transaction sequencing is what MEV is, and allows for validators to maximize revenue, sometimes at the expense of users. This can also explain the advantage of externalizing it to searchers whose task is to maximize this sequencing for the builder (validator) and avoid using too much of the precious compute time of a network leader, that's how MEV currently works on Solana with services like Harmonic and Jito, or Flashbots on Ethereum. But I digress (though MEV will for sure have a post of it's own here one day).
 
 ## The queue also grew
 
@@ -91,22 +89,16 @@ At 2,600 requested TPS, it achieved about 2,593 successful transactions per seco
 
 [Figure: Laptop benchmark results](#figure-capacity)
 
-At 2,800 requested TPS, throughput increased to about 2,771, but p95 reached 796 ms and the sampled mempool peaked at 2,388 transactions. The driver delivered every scheduled slot. The chain kept committing, but transactions spent longer waiting.
+At 2,800 requested TPS, throughput increased to about 2,771, but p95 reached 796 ms and the sampled mempool peaked at 2,388 transactions. The driver delivered every scheduled slot. The chain kept committing, but transactions spent longer waiting. Since this is a trading chain, my goal was to always have a p95 of under 500ms. 
 
-For an exchange, that waiting time matters. A cancel sitting in the queue leaves a maker's old quote available for someone else to trade against.
-
-Some earlier runs were limited by the driver itself: its workers missed scheduled submission slots. Timing only requests that reached a node would hide that delay. The benchmark therefore counts missed slots and measures latency from when each transaction was supposed to be sent.
-
-The load generator shares the laptop with the validators too. These runs tell me what this setup handles, not what a cluster on separate machines would handle.
+Some earlier runs were limited by the driver itself as it was handling about 500 different accounts all submitting transactions at various intervals. The load generator shares the laptop with the validators too. These runs tell me what this setup handles, not what a cluster on separate machines would handle.
 
 ## What's next
 
-The current profile points toward transaction execution, encoding changed state and journal synchronization. Mempool selection is now comparatively small.
+The current profile points toward transaction execution, encoding changed state and journal synchronization. Mempool selection is now comparatively small, though we aren't running any MEV software.
 
-I'd like to execute independent transactions in parallel, along the lines of Solana's [Sealevel runtime](https://solana.com/news/sealevel---parallel-processing-thousands-of-smart-contracts). Transactions that touch different state can run together; conflicting writes need an agreed order. Separate BTC and ETH books aren't enough when an account uses the same cross-margin collateral for both.
-
-There's also a practical limit: each validator process, including its threads, is pinned to one physical core. I can't dedicate extra cores to its execution workers without taking them away from another node. Testing that properly means changing the CPU allocation or using more hardware.
+I'd like to execute independent transactions in parallel, along the lines of Solana's [Sealevel runtime](https://solana.com/news/sealevel---parallel-processing-thousands-of-smart-contracts).  For realistic performance, this would probably require running a single node on my laptop and pinning different threads to each a CPU to test what maximum performance we can achieve, transactions that touch different state can run together; conflicting writes need an agreed order though shared collateral in for perp transactions severely limit parallelization between different perp orderbooks.
 
 Leader handoffs could use more work too. Pending transactions already get forwarded in bounded batches when the primary changes. One next step would be sending eligible transactions to the upcoming leader before rotation, giving it a warm queue rather than waiting for the switch. Any precomputed execution would still need to match the actual parent state.
 
-Finally, the journal has its own thread, but waiting for durability still delays state-dependent work. I'd like to see how much useful incoming-message work the node can do during that wait. There is still plenty to try before reaching for a bigger laptop.
+Finally, the journal has its own thread, but waiting for durability still delays state-dependent work. I'd like to see how much useful incoming-message work the node can do during that wait. There is still plenty to try before reaching for a bigger laptop and/or running on an actual network.
