@@ -40,3 +40,4 @@ next-env.d.ts
 
 # unpublished writing stays local
 /content/drafts/
+/public/videos/light-dex-tour-draft.mp4

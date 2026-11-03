@@ -5,6 +5,7 @@ import secondPost from '@/content/posts/building-a-dex-part-2.md?raw';
 import leafPayPost from '@/content/posts/how-a-solana-zk-mixer-works-leafpay.md?raw';
 import thirdPost from '@/content/posts/building-a-dex-part-3.md?raw';
 import fourthPost from '@/content/posts/building-a-dex-part-4.md?raw';
+import demoPost from '@/content/posts/light-dex-go-try-it.md?raw';
 
 export type Post = {
   slug: string;
@@ -25,7 +26,19 @@ const sources: Record<string, string> = {
   'how-a-solana-zk-mixer-works-leafpay': leafPayPost,
   'building-a-dex-part-3': thirdPost,
   'building-a-dex-part-4': fourthPost,
+  'light-dex-go-try-it': demoPost,
 };
+
+// Ignored drafts are available in local development, never in the Pages build.
+if (import.meta.env.DEV) {
+  const drafts = import.meta.glob('../content/drafts/*.md', {
+    query: '?raw', import: 'default', eager: true,
+  });
+  for (const [path, source] of Object.entries(drafts)) {
+    const slug = path.split('/').pop()!.replace(/\.md$/, '');
+    if (!(slug in sources)) sources[slug] = source as string;
+  }
+}
 
 export function getPostLabel(post: Post): string {
   if (post.series) return post.series;
