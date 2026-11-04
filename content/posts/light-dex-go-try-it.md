@@ -29,6 +29,8 @@ I've written a few posts about building it already, but quite a lot happened bet
   <figcaption>A quick tour of the control plane, markets and participants. You can run the same interface locally.</figcaption>
 </figure>
 
+[Try the live Light DEX network](#figure-light-dex-live)
+
 ## What you can do with it
 
 The control plane is where you'll spend most of your time. In Node operations, you can choose the number of validators, consensus algorithm, block time, timeout and leader rotation interval, then launch the chain. The default rotates leaders every four blocks.

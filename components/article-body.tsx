@@ -1,3 +1,4 @@
+import { LightDexLive } from './light-dex-live';
 import { HotstuffWalkthrough, MerkleWalkthrough, StateSharingWalkthrough } from './article-interactives';
 import { QuoteBatchingFigure, StructuralSharingFigure } from './article-benchmark-figures';
 import { splitArticleFigures } from '../lib/article-figures';
@@ -19,6 +20,7 @@ function StaticFigure({ src, width, height, alt, caption, wide = false }: {
 }
 
 const figures = {
+  'light-dex-live': LightDexLive,
   hotstuff: HotstuffWalkthrough,
   'hotstuff-topology': () => <StaticFigure
     src="/diagrams/hotstuff-topology.svg" width={800} height={310}
