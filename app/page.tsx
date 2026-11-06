@@ -1,4 +1,4 @@
-import { LightDexStatus } from '@/components/light-dex-status';
+import { LightDexBanner, LightDexStatus } from '@/components/light-dex-status';
 import { ArrowUpRight } from 'lucide-react';
 import { SiteFooter, SiteHeader } from '@/components/site-chrome';
 import { getPostShortLabel, getPosts } from '@/lib/posts';
@@ -58,6 +58,7 @@ export default function Home() {
 
   return <main><div className="page-shell">
     <SiteHeader />
+    <LightDexBanner />
 
     <section className="home-intro" id="about" aria-labelledby="intro-title">
       <h1 className="sr-only" id="intro-title">About me</h1>

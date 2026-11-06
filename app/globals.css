@@ -209,6 +209,12 @@ a:focus-visible { outline-color: var(--orange); }
 .light-dex-status i { width: 7px; height: 7px; border-radius: 50%; background: #78868b; }
 .light-dex-status.is-live a { color: #8de3bb; }
 .light-dex-status.is-live i { background: #54d5a0; }
+.light-dex-banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; padding: 11px 13px 11px 16px; background: #102a25; border: 1px solid #3b8d75; color: #a2f6df; font: 500 13px/1.5 var(--font-mono); }
+.light-dex-banner a { display: inline-flex; align-items: center; gap: 7px; }
+.light-dex-banner a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.light-dex-banner button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 26px; width: 26px; height: 26px; border: 0; background: transparent; color: inherit; cursor: pointer; }
+.light-dex-banner button:hover { background: #ffffff18; }
+.light-dex-banner a:focus-visible, .light-dex-banner button:focus-visible { outline: 2px solid #a2f6df; outline-offset: 3px; }
 .light-dex-entry { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 .light-dex-entry > a { font-weight: 600; }
 .light-dex-entry > span { color: var(--muted-ink); font-size: 13px; }

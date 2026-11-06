@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ArrowUpRight, X } from 'lucide-react';
 
 export const LIGHT_DEX_URL = 'https://light-dex.13.230.102.125.sslip.io';
 
@@ -61,4 +62,33 @@ export function LightDexStatus() {
       ? <a href={LIGHT_DEX_URL} target="_blank" rel="noreferrer" aria-label="Open the live Light DEX demo">{content}</a>
       : <span>{content}</span>}
   </span>;
+}
+
+export function LightDexBanner() {
+  const { state } = useLightDexStatus();
+  const [dismissed, setDismissed] = useState(true);
+
+  useEffect(() => {
+    try {
+      setDismissed(window.sessionStorage.getItem('light-dex-banner-dismissed') === '1');
+    } catch {
+      setDismissed(false);
+    }
+  }, []);
+
+  if (state !== 'live' || dismissed) return null;
+
+  function dismiss() {
+    setDismissed(true);
+    try {
+      window.sessionStorage.setItem('light-dex-banner-dismissed', '1');
+    } catch {
+      // The close button still works when browser storage is unavailable.
+    }
+  }
+
+  return <aside className="light-dex-banner" aria-label="Light DEX is live">
+    <a href={LIGHT_DEX_URL} target="_blank" rel="noreferrer">Light DEX is up, go try it now! <ArrowUpRight size={16} aria-hidden="true" /></a>
+    <button type="button" onClick={dismiss} aria-label="Dismiss Light DEX banner"><X size={17} aria-hidden="true" /></button>
+  </aside>;
 }
