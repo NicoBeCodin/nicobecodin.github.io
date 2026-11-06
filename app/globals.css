@@ -201,3 +201,14 @@ a:focus-visible { outline-color: var(--orange); }
   .site-footer-simple { display: block; }
   .site-footer-simple .footer-links { margin-top: 20px; }
 }
+
+/* Live demo links sit alongside project titles without nesting anchors. */
+.project-title-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; }
+.light-dex-status { flex-shrink: 0; font: 12px var(--font-mono); color: var(--muted-ink); }
+.light-dex-status a, .light-dex-status > span { display: inline-flex; align-items: center; gap: 7px; }
+.light-dex-status i { width: 7px; height: 7px; border-radius: 50%; background: #78868b; }
+.light-dex-status.is-live a { color: #8de3bb; }
+.light-dex-status.is-live i { background: #54d5a0; }
+.light-dex-entry { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.light-dex-entry > a { font-weight: 600; }
+.light-dex-entry > span { color: var(--muted-ink); font-size: 13px; }

@@ -7,6 +7,8 @@ part: 5
 readTime: 10 min read
 ---
 
+[Try the live Light DEX network](#figure-light-dex-live)
+
 ## Why I built this
 
 Over the past two months, after finishing my M2 internship in quant finance, I found myself wondering how decentralized exchanges actually work. They've been popping up pretty quickly since Hyperliquid exploded in popularity, and I wanted to understand what was happening underneath the trading interface.
@@ -28,8 +30,6 @@ I've written a few posts about building it already, but quite a lot happened bet
   </video>
   <figcaption>A quick tour of the control plane, markets and participants. You can run the same interface locally.</figcaption>
 </figure>
-
-[Try the live Light DEX network](#figure-light-dex-live)
 
 ## What you can do with it
 
