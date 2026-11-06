@@ -4,7 +4,7 @@ import { ArrowLeft, Download } from 'lucide-react';
 import { SiteFooter, SiteHeader } from '@/components/site-chrome';
 
 export const metadata: Metadata = {
-  title: 'tmux cheat sheet wallpaper — nicobecodin',
+  title: 'tmux cheat sheet wallpaper | nicobecodin',
   description: 'A dark tmux quick-reference wallpaper. Preview it and download a 1080p or 4K copy.',
   alternates: { canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://nicobecodin.github.io'}/tools/tmux-cheatsheet/` },
   openGraph: { title: 'tmux cheat sheet wallpaper', description: 'A dark tmux quick-reference wallpaper, available in 1080p and 4K.', images: [{ url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://nicobecodin.github.io'}/downloads/tmux-cheatsheet-1920x1080.png`, width: 1920, height: 1080, alt: 'Dark tmux quick-reference wallpaper' }] },

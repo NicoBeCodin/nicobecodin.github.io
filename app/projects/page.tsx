@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { ArrowUpRight } from 'lucide-react';
 import { SiteFooter, SiteHeader } from '@/components/site-chrome';
 
-export const metadata: Metadata = { title: 'Projects — nicobecodin', description: 'Selected work in market infrastructure, decentralized exchanges, Solana privacy, C++ and multicore systems.', alternates: { canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://nicobecodin.github.io'}/projects/` } };
+export const metadata: Metadata = { title: 'Projects | nicobecodin', description: 'Selected work in market infrastructure, decentralized exchanges, Solana privacy, C++ and multicore systems.', alternates: { canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://nicobecodin.github.io'}/projects/` } };
 
 const projects = [
   {id:'light-dex', number:'01', type:'RUST / DISTRIBUTED SYSTEMS', name:'Light DEX', status:'CURRENTLY BUILDING', text:'A learning project that starts with process-based nodes and PBFT-style consensus, then moves into deterministic exchange state, transfers and an order book. I use the build log to examine the implementation decisions and failure cases.', link:'/writing/building-a-dex-part-1', label:'Read the build log', sourceLink:'https://github.com/NicoBeCodin/light_dex', detail:'Rust · TCP · PBFT · exchange state'},
